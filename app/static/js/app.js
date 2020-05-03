@@ -34,6 +34,7 @@ Vue.component('app-footer', {
 const Upload_Form = Vue.component('upload-form', {
     template: `
     <form id='uploadForm' @submit.prevent="uploadPhoto">
+        <h1>Upload Form</h1>
         <div id="alerts" class="alert">
             {{ msg }}
             <ul>
