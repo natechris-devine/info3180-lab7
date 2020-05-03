@@ -12,6 +12,9 @@ Vue.component('app-header', {
           <li class="nav-item active">
             <router-link class="nav-link" to="/">Home <span class="sr-only">(current)</span></router-link>
           </li>
+          <li class="nav-item active">
+            <router-link class="nav-link" to="/upload">Upload <span class="sr-only">(current)</span></router-link>
+          </li>
         </ul>
       </div>
     </nav>
@@ -26,6 +29,51 @@ Vue.component('app-footer', {
         </div>
     </footer>
     `
+});
+
+const Upload_Form = Vue.component('upload-form', {
+    template: `
+     <form id='uploadForm' @submit.prevent="uploadPhoto">
+        <div class="form-group">   
+            <label for="description">Description:</label>
+            <textarea name='description' class="form-control" rows="3" id="description"></textarea>
+        </div>
+        <div class="form-group">   
+            <label for="photo">Select Photo:</label>
+            <input type="file" accept="image/png, image/jpeg" class="form-control" id="photo" name="photo"></input>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+     </form>
+    `,
+    methods: {
+        uploadPhoto: function() {
+            let uploadForm = document.getElementById('uploadForm');
+            // assuming form data works
+            let form_data = new FormData(uploadForm);
+            console.log(uploadForm);
+            console.log(form_data);
+
+            fetch("/api/upload", {
+                method: 'POST',
+                body: form_data,
+                headers: {
+                    'X-CSRFToken': token
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                return response.json();
+            })
+            .then(jsonResponse => {
+                // Display a success message
+                console.log(jsonResponse);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        }
+
+    }
 });
 
 const Home = Vue.component('home', {
@@ -57,6 +105,7 @@ const router = new VueRouter({
     routes: [
         {path: "/", component: Home},
         // Put other routes here
+        {path: "/upload", component: Upload_Form},
 
         // This is a catch all route in case none of the above matches
         {path: "*", component: NotFound}
