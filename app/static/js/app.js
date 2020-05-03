@@ -33,7 +33,13 @@ Vue.component('app-footer', {
 
 const Upload_Form = Vue.component('upload-form', {
     template: `
-     <form id='uploadForm' @submit.prevent="uploadPhoto">
+    <form id='uploadForm' @submit.prevent="uploadPhoto">
+        <div id="alerts" class="alert">
+            {{ msg }}
+            <ul>
+                <li v-for="err in errors">{{ err }}</li>
+            </ul>
+        </div>
         <div class="form-group">   
             <label for="description">Description:</label>
             <textarea name='description' class="form-control" rows="3" id="description"></textarea>
@@ -48,10 +54,8 @@ const Upload_Form = Vue.component('upload-form', {
     methods: {
         uploadPhoto: function() {
             let uploadForm = document.getElementById('uploadForm');
-            // assuming form data works
             let form_data = new FormData(uploadForm);
-            console.log(uploadForm);
-            console.log(form_data);
+            let msg_area = document.getElementById("alerts");
 
             fetch("/api/upload", {
                 method: 'POST',
@@ -65,14 +69,35 @@ const Upload_Form = Vue.component('upload-form', {
                 return response.json();
             })
             .then(jsonResponse => {
-                // Display a success message
                 console.log(jsonResponse);
+                if(jsonResponse.hasOwnProperty('message')) {
+                    this.msg = jsonResponse['message'];
+                    this.errors = []
+                    msg_area.classList.add("alert-success");
+                    msg_area.classList.remove("alert-danger");
+                } else {
+                    this.errors = jsonResponse['errors'];
+                    this.msg = "";
+                    msg_area.classList.add("alert-danger");
+                    msg_area.classList.remove("alert-success");
+                }
             })
             .catch(error => {
-                console.log(error);
+                this.errors = error;
             });
+
+            msg_area.style.display = "block";
         }
 
+    },
+    data: function() {
+        return {
+            msg: "",
+            errors: []
+        }
+    },
+    mounted: function() {
+        document.getElementById("alerts").style.display = "none";
     }
 });
 
